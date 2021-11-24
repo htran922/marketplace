@@ -1,0 +1,29 @@
+{
+  "name": "marketplace",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "prettier": "npx prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/htran922/marketplace.git"
+  },
+  "keywords": [],
+  "author": "Helen Tran",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/htran922/marketplace/issues"
+  },
+  "homepage": "https://github.com/htran922/marketplace#readme",
+  "dependencies": {
+    "@google-cloud/datastore": "^6.6.2",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15",
+    "prettier": "^2.4.1"
+  }
+}
