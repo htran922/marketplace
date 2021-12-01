@@ -33,7 +33,7 @@ const categoryControllers = {
       if (err) {
         res.status(400);
       } else {
-        const id = key.id;
+        const id = parseInt(key.id);
         const { protocol, originalUrl } = req;
         const self = `${protocol}://${req.get("host")}${originalUrl}/${id}`;
         res.status(201).json({
@@ -72,7 +72,7 @@ const categoryControllers = {
       }
 
       res.status(200).json({
-        id,
+        id: categoryId,
         name,
         description,
         created_at,
@@ -140,10 +140,89 @@ const categoryControllers = {
   /**
    * Edit a category by id
    */
+  editCategory: async (req, res) => {
+    // Check if request header is JSON
+    if (!req.is("application/json")) {
+      res.status(415).json({
+        Error: "Server only accepts application/json data",
+      });
+      return;
+    }
+
+    if (!req.body.name || !req.body.description) {
+      res.status(400).json({
+        Error:
+          "The request object is missing at least one of the required attributes",
+      });
+    }
+
+    const id = parseInt(req.params.category_id, 10);
+    const key = datastore.key(["Categories", id]);
+
+    // Get existing entity
+    const [entity] = await datastore.get(key);
+
+    if (!entity) {
+      res.status(404).json({
+        Error: "No category with this category_id exists",
+      });
+    }
+
+    // Build data object with new modified_at property
+    let data = {
+      name: entity["name"],
+      description: entity["description"],
+      listings: entity["listings"],
+      created_at: entity["created_at"],
+      modified_at: new Date(),
+    };
+
+    // Replace data object with any properties from request body
+    for (let property in req.body) {
+      data[property] = req.body[property];
+    }
+
+    const updatedCategory = {
+      key,
+      data,
+    };
+
+    datastore.save(updatedCategory, (err, apiResponse) => {
+      if (!err) {
+        const { protocol, originalUrl } = req;
+        const self = `${protocol}://${req.get("host")}${originalUrl}`;
+        const returnJson = {
+          id,
+          name: data["name"],
+          description: data["description"],
+          created_at: data["created_at"],
+          modified_at: data["modified_at"],
+          listings: data["listings"],
+          self,
+        };
+        res.status(303).set("Location", self).json(returnJson);
+      }
+    });
+  },
 
   /**
    * Delete a category by id
    */
+  deleteCategory: async (req, res) => {
+    const id = parseInt(req.params.category_id, 10);
+    const key = datastore.key(["Categories", id]);
+
+    const [entity] = await datastore.get(key);
+    if (entity) {
+      datastore.delete(key, (err, apiResponse) => {
+        res.status(204).json();
+      });
+    } else {
+      res.status(404).json({
+        Error: "No category with this category_id exists",
+      });
+    }
+  },
 };
 
 module.exports = categoryControllers;
