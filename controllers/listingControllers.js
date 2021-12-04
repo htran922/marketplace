@@ -1,21 +1,13 @@
 const ds = require("../datastore");
 const datastore = ds.datastore;
-const _ = require("lodash");
 
 const listingControllers = {
   /**
    * Add a new listing entity
    */
   addListing: async (req, res) => {
-    const { name, description, condition, price, userId } =
-      req.body;
-    if (
-      !name ||
-      !description ||
-      !condition ||
-      !price ||
-      !userId
-    ) {
+    const { name, description, condition, price } = req.body;
+    if (!name || !description || !condition || !price) {
       res.status(400).json({
         Error:
           "The request object is missing at least one of the required attributes",
@@ -32,7 +24,7 @@ const listingControllers = {
         condition,
         price,
         category: null,
-        user_id: userId,
+        user_id: req.user.sub,
         created_at: currentDateTime,
         modified_at: currentDateTime,
       },

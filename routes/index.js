@@ -98,7 +98,7 @@ router.get("/profile", secured(), async (req, res, next) => {
 
   res.render("profile", {
     token: token,
-    userId: userInfo.extraParams.sub,
+    userId: userInfo.profile["user_id"],
     title: "User Profile",
   });
 });

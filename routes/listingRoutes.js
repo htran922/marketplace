@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const { checkJwt } = require("../lib/utils");
 const listingControllers = require("../controllers/listingControllers");
 
 router
   .route("/")
-  .post(listingControllers.addListing)
+  .post(checkJwt.invalidToken, listingControllers.addListing)
   // .get(listingControllers.getListings);
 
 // router
