@@ -12,6 +12,7 @@ router
   .route("/:listing_id")
   .get(checkJwt.invalidToken, listingControllers.getListing)
   .put(checkJwt.invalidToken, listingControllers.editListing)
+  .patch(checkJwt.invalidToken, listingControllers.editListing)
   .delete(checkJwt.invalidToken, listingControllers.deleteListing);
 
 router

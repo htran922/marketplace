@@ -149,11 +149,13 @@ const categoryControllers = {
       return;
     }
 
-    if (!req.body.name || !req.body.description) {
+    // Validate for missing attribute if request method is PUT
+    if (req.method === "PUT" && (!req.body.name || !req.body.description)) {
       res.status(400).json({
         Error:
           "The request object is missing at least one of the required attributes",
       });
+      return;
     }
 
     const id = parseInt(req.params.category_id, 10);
@@ -210,7 +212,12 @@ const categoryControllers = {
           listings: data["listings"],
           self,
         };
-        res.status(303).set("Location", self).json(returnJson);
+
+        if (req.method === "PUT") {
+          res.status(303).set("Location", self).json(returnJson);
+        } else {
+          res.status(200).json(returnJson);
+        }
       }
     });
   },

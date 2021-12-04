@@ -168,11 +168,15 @@ const listingControllers = {
     }
 
     const { name, description, condition, price } = req.body;
-    if (!name || !description || !condition || !price) {
+    if (
+      req.method === "PUT" &&
+      (!name || !description || !condition || !price)
+    ) {
       res.status(400).json({
         Error:
           "The request object is missing at least one of the required attributes",
       });
+      return;
     }
 
     const listingId = parseInt(req.params.listing_id, 10);
@@ -232,7 +236,13 @@ const listingControllers = {
           category: data["category"],
           self,
         };
-        res.status(303).set("Location", self).json(returnJson);
+
+        if (req.method === "PUT") {
+          res.status(303).set("Location", self).json(returnJson);
+        } else {
+          res.status(200).json(returnJson);
+        }
+     
       }
     });
   },
