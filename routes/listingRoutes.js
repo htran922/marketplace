@@ -6,7 +6,7 @@ const listingControllers = require("../controllers/listingControllers");
 router
   .route("/")
   .post(checkJwt.invalidToken, listingControllers.addListing)
-  // .get(listingControllers.getListings);
+  .get(checkJwt.invalidToken, listingControllers.getListings);
 
 // router
 //   .route("/:listing_id")
