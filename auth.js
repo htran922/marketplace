@@ -21,8 +21,8 @@ passport.use(
       // extraParams.id_token has the JSON Web Token
       // profile has all the information from the user
       const userInfo = {
-        userProfile: profile,
-        extraParams: extraParams,
+        profile,
+        extraParams,
       };
       return done(null, userInfo);
     }
