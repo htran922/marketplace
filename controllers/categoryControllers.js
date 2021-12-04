@@ -168,6 +168,7 @@ const categoryControllers = {
       res.status(404).json({
         Error: "No category with this category_id exists",
       });
+      return;
     }
 
     // Build data object with new modified_at property

@@ -189,6 +189,7 @@ const listingControllers = {
       res.status(404).json({
         Error: "No listing with this listing_id exists",
       });
+      return;
     }
 
     // Build data object with new modified_at property
