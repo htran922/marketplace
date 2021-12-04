@@ -2,22 +2,22 @@ const express = require("express");
 const passport = require("passport");
 require("../auth");
 const router = express.Router();
-const categoryRoutes = require("./categoryRoutes");
-const userRoutes = require("./userRoutes");
-const secured = require("../lib/middleware/secured")
+const secured = require("../lib/middleware/secured");
 const util = require("util");
 const url = require("url");
-const queryString = require("query-string")
+const queryString = require("query-string");
 const fetch = require("node-fetch-commonjs");
-const _ = require('lodash'); 
+const _ = require("lodash");
 const ds = require("../datastore");
 const datastore = ds.datastore;
-// const { isUserInDatastore } = require("../lib/utils")
+const categoryRoutes = require("./categoryRoutes");
+const userRoutes = require("./userRoutes");
+const listingRoutes = require("./listingRoutes");
 
 const {
   AUTH0_DOMAIN_URL,
   AUTH0_CLIENT_ID,
-  AUTH0_RETURN_URL
+  AUTH0_RETURN_URL,
 } = require("../constants");
 
 /* GET home page. */
@@ -75,35 +75,36 @@ router.get("/profile", secured(), async (req, res, next) => {
 
   // Check if user exists in datastore
   const query = datastore.createQuery("Users").filter("user_id", "=", userId);
-  const [ entities] = await datastore.runQuery(query)
+  const [entities] = await datastore.runQuery(query);
   if (_.isEmpty(entities)) {
-    // Make a fetch POST request to create user 
+    // Make a fetch POST request to create user
     const options = {
       userId,
-      email
-    }
-   
+      email,
+    };
+
     const jsonStringData = JSON.stringify(options);
 
     const response = await fetch("http://localhost:8080/users", {
       method: "POST",
       body: jsonStringData,
       headers: {
-        "Content-Type": "application/json"
-      }
-    })
+        "Content-Type": "application/json",
+      },
+    });
 
     await response.json();
   }
 
   res.render("profile", {
     token: token,
-    userId: userInfo.extraParams.sub, 
+    userId: userInfo.extraParams.sub,
     title: "User Profile",
   });
-})
+});
 
 router.use("/users", userRoutes);
 router.use("/categories", categoryRoutes);
+router.use("/listings", listingRoutes);
 
 module.exports = router;
