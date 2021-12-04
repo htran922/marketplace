@@ -8,13 +8,11 @@ const userControllers = {
   addUser: async (req, res) => {
     const key = datastore.key("Users");
     const { userId, email } = req.body;
-    const listings = []; // New user starts with no associated listings
     const newUser = {
       key,
       data: {
         user_id: userId,
-        email,
-        listings
+        email
       },
     };
 
@@ -28,7 +26,6 @@ const userControllers = {
         res.status(201).json({
           user_id: userId,
           email,
-          listings,
           self,
         });
       }

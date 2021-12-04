@@ -191,6 +191,16 @@ const categoryControllers = {
       if (!err) {
         const { protocol, originalUrl } = req;
         const self = `${protocol}://${req.get("host")}${originalUrl}`;
+
+        // Add self link to associated listings
+        if (data["listings"].length > 0) {
+          data["listings"].forEach((listing) => {
+            const id = listing.id;
+            const self = `${protocol}://${req.get("host")}/listings/${id}`;
+            listing["self"] = self;
+          });
+        }
+
         const returnJson = {
           id,
           name: data["name"],
@@ -214,6 +224,7 @@ const categoryControllers = {
 
     const [entity] = await datastore.get(key);
     if (entity) {
+      // TODO: Set all listings with this category to null
       datastore.delete(key, (err, apiResponse) => {
         res.status(204).json();
       });
