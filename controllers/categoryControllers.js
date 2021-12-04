@@ -1,5 +1,6 @@
 const ds = require("../datastore.js");
 const datastore = ds.datastore;
+const _ = require("lodash");
 
 const categoryControllers = {
   /**
@@ -13,6 +14,7 @@ const categoryControllers = {
         Error:
           "The request object is missing at least one of the required attributes",
       });
+      return;
     }
 
     const key = datastore.key("Categories");
@@ -71,15 +73,21 @@ const categoryControllers = {
         });
       }
 
-      res.status(200).json({
-        id: categoryId,
-        name,
-        description,
-        created_at,
-        modified_at,
-        listings,
-        self,
-      });
+      if (req.accepts("application/json")) {
+        res.status(200).json({
+          id: categoryId,
+          name,
+          description,
+          created_at,
+          modified_at,
+          listings,
+          self,
+        });
+      } else {
+        res.status(406).json({
+          Error: "The request MIME type is not supported at this endpoint",
+        });
+      }
     } else {
       res.status(404).json({
         Error: "No category with this category_id exists",
@@ -141,7 +149,6 @@ const categoryControllers = {
    * Edit a category by id
    */
   editCategory: async (req, res) => {
-    // Check if request header is JSON
     if (!req.is("application/json")) {
       res.status(415).json({
         Error: "Server only accepts application/json data",
@@ -227,13 +234,30 @@ const categoryControllers = {
    * Delete a category by id
    */
   deleteCategory: async (req, res) => {
-    const id = parseInt(req.params.category_id, 10);
-    const key = datastore.key(["Categories", id]);
+    const categoryId = parseInt(req.params.category_id, 10);
+    const categoryKey = datastore.key(["Categories", categoryId]);
 
-    const [entity] = await datastore.get(key);
-    if (entity) {
-      // TODO: Set all listings with this category to null
-      datastore.delete(key, (err, apiResponse) => {
+    const [categoryEntity] = await datastore.get(categoryKey);
+    if (categoryEntity) {
+      // Find the listing entity with that id and set category to null
+      if (!_.isEmpty(categoryEntity.listings)) {
+        const query = datastore
+          .createQuery("Listings")
+          .filter("category.id", "=", categoryId);
+        const [listingEntities] = await datastore.runQuery(query);
+        if (listingEntities.length > 0) {
+          listingEntities.forEach((listing) => {
+            listing.category = null;
+          });
+        }
+        try {
+          await datastore.save(listingEntities);
+        } catch (err) {
+          throw err;
+        }
+      }
+
+      datastore.delete(categoryKey, (err, apiResponse) => {
         res.status(204).json();
       });
     } else {
