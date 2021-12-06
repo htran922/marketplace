@@ -104,6 +104,10 @@ const listingControllers = {
         modified_at,
         self,
       });
+    } else {
+      res.status(404).json({
+        Error: "No listing with this listing_id exists",
+      });
     }
   },
 
@@ -323,6 +327,13 @@ const listingControllers = {
     const [categoryEntity] = await datastore.get(categoryKey);
 
     if (listingEntity && categoryEntity) {
+      if (listingEntity["user_id"] !== req.user.sub) {
+        res.status(403).json({
+          Error: "Cannot assign category to listing created by another user",
+        });
+        return;
+      }
+
       // Check if category is null for the listing
       if (listingEntity.category === null) {
         listingEntity.category = {
@@ -376,6 +387,13 @@ const listingControllers = {
     const [categoryEntity] = await datastore.get(categoryKey);
 
     if (listingEntity && categoryEntity) {
+      if (listingEntity["user_id"] !== req.user.sub) {
+        res.status(403).json({
+          Error: "Cannot remove category from listing created by another user",
+        });
+        return;
+      }
+
       // Check if category is assigned to listing
       if (
         listingEntity.category != null &&
