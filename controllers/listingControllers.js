@@ -63,14 +63,14 @@ const listingControllers = {
 
     const [entity] = await datastore.get(key);
 
-    if (entity["user_id"] !== req.user.sub) {
-      res.status(403).json({
-        Error: "Cannot view listing owned by another user",
-      });
-      return;
-    }
-
     if (entity) {
+      if (entity["user_id"] !== req.user.sub) {
+        res.status(403).json({
+          Error: "Cannot view listing created by another user",
+        });
+        return;
+      }
+
       const {
         name,
         description,
@@ -192,16 +192,16 @@ const listingControllers = {
     // Get existing entity
     const [entity] = await datastore.get(key);
 
-    if (entity["user_id"] !== req.user.sub) {
-      res.status(403).json({
-        Error: "Cannot edit listing owned by another user",
+    if (!entity) {
+      res.status(404).json({
+        Error: "No listing with this listing_id exists",
       });
       return;
     }
 
-    if (!entity) {
-      res.status(404).json({
-        Error: "No listing with this listing_id exists",
+    if (entity["user_id"] !== req.user.sub) {
+      res.status(403).json({
+        Error: "Cannot edit listing created by another user",
       });
       return;
     }
@@ -271,9 +271,9 @@ const listingControllers = {
     const [listingEntity] = await datastore.get(listingKey);
 
     if (listingEntity) {
-      if (listingEntity["user_id"] !== req.user.id) {
+      if (listingEntity["user_id"] !== req.user.sub) {
         res.status(403).json({
-          Error: "Cannot delete listing owned by another user",
+          Error: "Cannot delete listing created by another user",
         });
         return;
       }
